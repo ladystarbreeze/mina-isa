@@ -75,12 +75,12 @@ More data types will be defined in future versions of the MINA ISA.
 The machine control register (**MCR**) is a an important register with information about the current state of the MINA implementation. It is a 64-bit (*longword*) register and accessible through special move and load-store instructions.
 
 ```
-MCR: [OMCR(32)][SBZ(12)][IE(1)][T(1)][Mode(2)][SBZ(4)][Cause(4)][Comment(8)]
+MCR: [OMCR(32)][SBZ(12)][ID(1)][T(1)][Mode(2)][SBZ(4)][Cause(4)][Comment(8)]
 ```
 
 `OMCR` is a special 32-bit field used to save the current **MCR** during event handling.
 
-`IE` is the Interrupt Fault Enable bit. If this bit is set, external events do not generate an *Interrupt* fault event. They can still wake up a MINA implementation after `WFI`, though.
+`ID` is the Interrupt Disable bit. If this bit is set, external events do not generate an *External Interrupt* fault event. They can still wake up a MINA implementation after `WFI`, though.
 
 `T` is the Condition True bit. If this bit is set, `T` variants of conditional instructions are executed. If this bit is clear, `F` variants of conditional instructions are executed.
 
@@ -105,8 +105,8 @@ The `Cause` field contains information about the type of the current fault event
 * 1001: reserved
 * 1010: reserved
 * 1011: reserved
-* 1100: reserved
-* 1101: reserved
+* 1100: *External Interrupt*
+* 1101: *User Interrupt*
 * 1110: *Supervisor Call*
 * 1111: *Reset*
 
@@ -136,7 +136,7 @@ The following section describes version 1 of the MINA32 base integer ISA.
 
 ### **2.1. Overview**
 
-MINA32 has 16 32-bit general-purpose registers *r0-r15*, which hold integer values. Register r15 is a hardwired stack pointer, though it can also be used as a regular GPR outside of stack operations. A user-visible program counter register holds the address of the current instruction.
+MINA32 has 16 32-bit general-purpose registers *r0-r15*, which hold integer values. Registers r8-r15 are banked, each mode has its own copies of these registers. Register r15 is a hardwired stack pointer, though it can also be used as a regular GPR outside of stack operations. A user-visible program counter register holds the address of the current instruction.
 
 ***
 
@@ -178,15 +178,15 @@ The `group` field is `0000` for these instructions.
 
 `[opcode = 0001]` `MULTI` multiplies the sign-extended and shifted 12-bit immediate with register `src1`, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers.
 
-`[opcode = 0010]` `DIVI` divides register `src1` by the sign-extended and shifted 12-bit immediate, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers.
+`[opcode = 0010]` `DIVI` divides register `src1` by the sign-extended and shifted 12-bit immediate, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers. **Note: this instruction might be removed from the base integer ISA!**
 
-`[opcode = 0011]` `REMI` computes the remainder of the division of register `src1` by the sign-extended and shifted 12-bit immediate, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers.
+`[opcode = 0011]` `REMI` computes the remainder of the division of register `src1` by the sign-extended and shifted 12-bit immediate, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers. **Note: this instruction might be removed from the base integer ISA!**
 
 `[opcode = 0100]` `SLTI` sets register `dest` to 1 if register `src1` is less than the sign-extended and shifted 12-bit immediate, 0 otherwise. Both operands are treated as signed numbers.
 
 `[opcode = 0101]` `SLTIU` sets register `dest` to 1 if register `src1` is less than the sign-extended and shifted 12-bit immediate, 0 otherwise. Both operands are treated as unsigned numbers.
 
-`[opcode = 0110]` `NOP` does not alter the user-visible state. It advances the program counter. The `src1`, `shift`, `dest` and `imm` fields are ignored and should be 0.
+`[opcode = 0110]` `NOP` does not alter the user-visible state. It advances the program counter. The `src1`, `shift`, `dest` and `imm` fields are ignored and should be 0. **Note: this instruction might be removed from the ISA!**
 
 `[opcode = 0111]` `PCADDI` adds the sign-extended and shifted 12-bit immediate to register `pc`, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers. The `src1` field is ignored and should be 0.
 
@@ -196,9 +196,9 @@ The `group` field is `0000` for these instructions.
 
 `[opcode = 1001]` `MULT` multiplies register `src2` with register `src1`, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers.
 
-`[opcode = 1010]` `DIV` divides register `src1` by register `src2`, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers.
+`[opcode = 1010]` `DIV` divides register `src1` by register `src2`, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers. **Note: this instruction might be removed from the base integer ISA!**
 
-`[opcode = 1011]` `REM` computes the remainder of the division of register `src1` by register `src2`, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers.
+`[opcode = 1011]` `REM` computes the remainder of the division of register `src1` by register `src2`, the low 32 bits of the result are placed in register `dest`. Both operands are treated as unsigned numbers. **Note: this instruction might be removed from the base integer ISA!**
 
 `[opcode = 1100]` `SLT` sets register `dest` to 1 if register `src1` is less than register `src2`, 0 otherwise. Both operands are treated as signed numbers.
 
@@ -224,7 +224,7 @@ The `group` field is `0001` for these instructions.
 
 `[opcode = 0010]` `XORI` logically XORs the sign-extended and shifted 12-bit immediate with register `src1`, the low 32 bits of the result are placed in register `dest`.
 
-`[opcode = 0011]` `NANDI` logically NANDs the sign-extended and shifted 12-bit immediate with register `src1`, the low 32 bits of the result are placed in register `dest`.
+`[opcode = 0011]` `NANDI` logically NANDs the sign-extended and shifted 12-bit immediate with register `src1`, the low 32 bits of the result are placed in register `dest`. **Note: this instruction might be removed from the ISA!**
 
 #### **Register-Register Instructions**
 
@@ -234,13 +234,13 @@ The `group` field is `0001` for these instructions.
 
 `[opcode = 1010]` `XOR` logically XORs register `src2` with register `src1`, the low 32 bits of the result are placed in register `dest`.
 
-`[opcode = 1011]` `NAND` logically NANDs register `src2` with register `src1`, the low 32 bits of the result are placed in register `dest`.
+`[opcode = 1011]` `NAND` logically NANDs register `src2` with register `src1`, the low 32 bits of the result are placed in register `dest`. **Note: this instruction might be removed from the ISA!**
 
 `[opcode = 1100]` `POPCNT` computes the population count of register `src1`, the result is placed in register `dest`. The `src2` field is ignored and should be 0.
 
 `[opcode = 1101]` `CLO` computes the number of leading 1s in register `src1`, the result is placed in register `dest`. The `src2` field is ignored and should be 0.
 
-`[opcode = 1110]` `PLO` computes the position (plus 1) of the leading 1 in register `src1`, the result is placed in register `dest`. If register `src1` is 0, the result is 0. The `src2` field is ignored and should be 0.
+`[opcode = 1110]` `PLO` computes the position of the leading 1 in register `src1`, the result is placed in register `dest`. If register `src1` is 0, the result is 32. The `src2` field is ignored and should be 0.
 
 ***
 
@@ -354,13 +354,13 @@ The `group` field is `0101` for these instructions.
 
 `[opcode = 0001]` `MTI` moves the sign-extended and shifted 12-bit immediate to register `dest` if the T bit is set. The `src1` field is ignored and should be 0.
 
-`[opcode = 0010]` `MFI` moves the sign-extended and shifted 12-bit immediate to register `dest` if the T bit is clear. The `src1` field is ignored and should be 0.
+`[opcode = 0010]` `MFI` moves the sign-extended and shifted 12-bit immediate to register `dest` if the T bit is clear. The `src1` field is ignored and should be 0. **Note: this instruction might be removed from the ISA!**
 
 #### **Special Move Instructions**
 
 `[opcode = 0011]` `MOVL` moves the 16-bit immediate to the lower half of register `dest` without clearing the upper half. The 16-bit immediate is not sign-extended.
 
-`[opcode = 0100]` `MOVU` moves the 16-bit immediate to the upper half of register `dest` without clearing the lower half. The 16-bit immediate is not sign-extended.
+`[opcode = 0100]` `MOVU` moves the 16-bit immediate to the upper half of register `dest` and clears the lower half. The 16-bit immediate is not sign-extended.
 
 #### **Register-Register Instructions**
 
@@ -383,6 +383,8 @@ The `group` field is `0101` for these instructions.
 ### **2.9. Shift Instructions**
 
 All shift instructions operate on either 32-bit or 64-bit values. Shift instructions use the S-type, I-type and F-type instruction formats, enabling register-immediate, register-register and special (funnel) shift operations respectively. Shift instructions do not cause any fault events.
+
+The `group` field is `0110` for these instructions.
 
 #### **Register-Immediate Instructions**
 
@@ -416,6 +418,8 @@ All shift instructions operate on either 32-bit or 64-bit values. Shift instruct
 
 Control instructions control the state of a MINA implementation. Control instructions use the S-type and I-type instruction formats. Control instructions may generate fault events.
 
+The `group` field is `0111` for these instructions.
+
 #### **Register-Immediate Instructions**
 
 `[opcode = 0000]` `STOP` effectively shuts down a MINA implementation until a reset occurs. The `src1`, `shift`, `dest` and `imm` fields are ignored and should be 0. This is a privileged instruction; executing this instruction in *User* mode generates a *Privilege Mismatch* fault event.
@@ -443,6 +447,8 @@ Control instructions control the state of a MINA implementation. Control instruc
 ### **2.11. PC-Relative Branch Instructions**
 
 PC-relative branch instructions enable branches relative to the memory address of the current location. PC-relative branch instructions use the B-type instruction format. These instructions can be executed conditionally. The offset is left-shifted by 2 after it has been sign-extended. PC-relative branch instructions do not cause any fault events.
+
+The `group` field is `1000` for these instructions.
 
 #### **PC-Relative Branch Instructions**
 
