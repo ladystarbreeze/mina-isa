@@ -1,0 +1,7 @@
+# directories
+_build
+_static
+_templates
+
+# files
+conf.py
