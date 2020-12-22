@@ -42,3 +42,94 @@ Machine Control Register
 
 The *Machine Control Register* (MCR) is a longword register displaying information about the current state of a MINA implementation.
 It is accessible through special move and load-store instructions.
+
+.. figure:: images/mcr.png
+   :width:    762px
+   :align:    center
+   :alt:      alternate text
+
+   Figure 1: Machine Control Register
+
+``OMCR`` (Old Machine Control Register) is a special 32-bit field holding a copy of the low 32 bits of MCR during fault handling.
+
+``EXT`` (Extension) is a *read-only* 12-bit field.
+All bits in this field indicate the presence or absence of certain instruction extensions.
+Writes to this field are ignored. Undefined bits are hardwired to ``low``.
+
++-------+------------------+
+|  Bit  | Extension        |
++=======+==================+
+|   0   | Division         |
++-------+------------------+
+|   6   | FloatingMINA     |
++-------+------------------+
+|   7   | VectorMINA       |
++-------+------------------+
+|   8   | User Extension 1 |
++-------+------------------+
+|   9   | User Extension 2 |
++-------+------------------+
+|  1 0  | User Extension 3 |
++-------+------------------+
+|  1 1  | User Extension 4 |
++-------+------------------+
+
+``ID`` (Interrupt Disable) controls the generation of *External Interrupt* faults.
+When this bit is high, interrupts do not generate *External Interrupt* faults.
+
+.. note:: The state of ``ID`` does not affect the operation of the ``WFI`` instruction.
+
+``T`` (Condition True) controls the execution of predicated instructions.
+``T`` variants execute when this bit is high, ``F`` variants execute when this bit is low.
+
+``MODE`` (Mode) is a 2-bit field determining the current processor operating mode.
+
++-----------+------------+-----------------------+
+| MODE[1:0] | Mode       | Visible Registers     |
++===========+============+=======================+
+|    0 0    | User       | r0-r7, r8_usr-r15_usr |
++-----------+------------+-----------------------+
+|    0 1    | Supervisor | r0-r7, r8_svc-r15_svc |
++-----------+------------+-----------------------+
+|    1 0    | Reserved   |                       |
++-----------+------------+-----------------------+
+|    1 1    | Reserved   |                       |
++-----------+------------+-----------------------+
+
+.. warning:: Writing ``Reserved`` values to this field generates an *Invalid State* fault.
+
+During fault processing, the current fault cause is loaded into the 4-bit ``CAUSE`` (Cause) field.
+On reset, this field is ``1111``.
+
++------------+--------------------------+
+| CAUSE[3:0] | Fault Cause              |
++============+==========================+
+|    0000    | Misaligned Load Address  |
++------------+--------------------------+
+|    0001    | Misaligned Store Address |
++------------+--------------------------+
+|    0100    | Invalid State            |
++------------+--------------------------+
+|    0101    | Privilege Mismatch       |
++------------+--------------------------+
+|    1000    | Undefined Instruction    |
++------------+--------------------------+
+|    1100    | External Interrupt       |
++------------+--------------------------+
+|    1101    | User Interrupt           |
++------------+--------------------------+
+|    1110    | Supervisor Call          |
++------------+--------------------------+
+|    1111    | Reset                    |
++------------+--------------------------+
+
+.. note:: It is possible to program undefined values into ``CAUSE``. However, this is discouraged as future versions of MINA may define these values. To avoid software incompatibilities, use ``User Interrupt`` for user-defined faults.
+
+``COMMENT`` (Comment) is an 8-bit field that can be used to pass information from the current ``User`` mode thread to the ``Supervisor`` mode thread.
+The ``SVCALL`` and ``FAULT`` instructions write a user-defined value into this field.
+
+The Stack
+---------
+
+MINA uses a full-descending stack model. Push operations *decrement* the stack pointer *before* writing data onto the stack.
+Pop operations *increment* the stack pointer *after* loading data from the stack.
