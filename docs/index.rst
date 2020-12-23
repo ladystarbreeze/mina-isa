@@ -10,3 +10,4 @@ MINA Instruction Set Architecture v0.1.0
    :maxdepth: 2
 
    introduction
+   mina32
