@@ -22,3 +22,17 @@ The two system registers are MCR - the *Machine Control Register* - and FRET - t
 While limited MCR access is possible in ``User`` mode, FRET is only visible to ``Supervisor`` mode threads.
 
 The user-visible *program counter* (PC) holds the address of the currently executing instruction.
+
+Fault Entry And Exit
+--------------------
+
+MINA faults are handled as follows:
+
+1. Depending on the fault cause, FRET is loaded with ``PC`` or ``PC + 4``.
+2. MCR is left-shifted by 32. ``ID`` is pulled ``high``, ``MODE`` is loaded with ``10`` (``Supervisor``).
+3. ``CAUSE`` is loaded with an appropriate fault code.
+4. In case of a user-generated fault, ``COMMENT`` is loaded with a user-defined 8-bit value.
+5. ``PC`` is set to 0.
+
+To return from a fault, a fault handler must use the ``SWITCH`` instruction.
+``SWITCH`` restores MCR by right-shifting it by 32 and resets ``PC`` to the value stored in FRET.

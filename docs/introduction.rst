@@ -61,6 +61,8 @@ Writes to this field are ignored. Undefined bits are hardwired to ``low``.
 +=======+==================+
 |   0   | Division         |
 +-------+------------------+
+|   1   | Cache Control    |
++-------+------------------+
 |   6   | FloatingMINA     |
 +-------+------------------+
 |   7   | VectorMINA       |
