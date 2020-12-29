@@ -77,12 +77,12 @@ Writes to this field are ignored. Undefined bits are hardwired to ``low``.
 +-------+------------------+
 
 ``ID`` (Interrupt Disable) controls the generation of *External Interrupt* faults.
-When this bit is high, interrupts do not generate *External Interrupt* faults.
+When this bit is ``high``, interrupts do not generate *External Interrupt* faults.
 
 .. note:: The state of ``ID`` does not affect the operation of the ``WFI`` instruction.
 
 ``T`` (Condition True) controls the execution of predicated instructions.
-``T`` variants execute when this bit is high, ``F`` variants execute when this bit is low.
+``T`` variants execute when this bit is ``high``, ``F`` variants execute when this bit is ``low``.
 
 ``MODE`` (Mode) is a 2-bit field determining the current processor operating mode.
 
