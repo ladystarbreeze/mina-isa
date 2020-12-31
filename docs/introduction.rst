@@ -57,23 +57,23 @@ All bits in this field indicate the presence or absence of certain instruction e
 Writes to this field are ignored. Undefined bits are hardwired to ``low``.
 
 +-------+------------------+
-|  Bit  | Extension        |
+| Bit   | Extension        |
 +=======+==================+
-|   0   | Division         |
+| 0     | Division         |
 +-------+------------------+
-|   1   | Cache Control    |
+| 1     | Cache Control    |
 +-------+------------------+
-|   6   | FloatingMINA     |
+| 6     | FloatingMINA     |
 +-------+------------------+
-|   7   | VectorMINA       |
+| 7     | VectorMINA       |
 +-------+------------------+
-|   8   | User Extension 1 |
+| 8     | User Extension 1 |
 +-------+------------------+
-|   9   | User Extension 2 |
+| 9     | User Extension 2 |
 +-------+------------------+
-|  1 0  | User Extension 3 |
+| 10    | User Extension 3 |
 +-------+------------------+
-|  1 1  | User Extension 4 |
+| 11    | User Extension 4 |
 +-------+------------------+
 
 ``ID`` (Interrupt Disable) controls the generation of *External Interrupt* faults.
@@ -89,13 +89,13 @@ When this bit is ``high``, interrupts do not generate *External Interrupt* fault
 +-----------+------------+-----------------------+
 | MODE[1:0] | Mode       | Visible Registers     |
 +===========+============+=======================+
-|    0 0    | User       | r0-r7, r8_usr-r15_usr |
+| 00        | User       | r0-r7, r8_usr-r15_usr |
 +-----------+------------+-----------------------+
-|    0 1    | Supervisor | r0-r7, r8_svc-r15_svc |
+| 01        | Supervisor | r0-r7, r8_svc-r15_svc |
 +-----------+------------+-----------------------+
-|    1 0    | Reserved   |                       |
+| 10        | Reserved   |                       |
 +-----------+------------+-----------------------+
-|    1 1    | Reserved   |                       |
+| 11        | Reserved   |                       |
 +-----------+------------+-----------------------+
 
 .. warning:: Writing ``Reserved`` values to this field generates an *Invalid State* fault.
@@ -106,23 +106,23 @@ On reset, this field is ``1111``.
 +------------+--------------------------+
 | CAUSE[3:0] | Fault Cause              |
 +============+==========================+
-|    0000    | Misaligned Load Address  |
+| 0000       | Misaligned Load Address  |
 +------------+--------------------------+
-|    0001    | Misaligned Store Address |
+| 0001       | Misaligned Store Address |
 +------------+--------------------------+
-|    0100    | Invalid State            |
+| 0100       | Invalid State            |
 +------------+--------------------------+
-|    0101    | Privilege Mismatch       |
+| 0101       | Privilege Mismatch       |
 +------------+--------------------------+
-|    1000    | Undefined Instruction    |
+| 1000       | Undefined Instruction    |
 +------------+--------------------------+
-|    1100    | External Interrupt       |
+| 1100       | External Interrupt       |
 +------------+--------------------------+
-|    1101    | User Interrupt           |
+| 1101       | User Interrupt           |
 +------------+--------------------------+
-|    1110    | Supervisor Call          |
+| 1110       | Supervisor Call          |
 +------------+--------------------------+
-|    1111    | Reset                    |
+| 1111       | Reset                    |
 +------------+--------------------------+
 
 .. note:: It is possible to program undefined values into ``CAUSE``. However, this is discouraged as future versions of MINA may define these values. To avoid software incompatibilities, use ``User Interrupt`` for user-defined faults.
