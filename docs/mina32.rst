@@ -350,3 +350,28 @@ PC-Relative Branch Group (``1000``)
 +--------+----------+--------------------------------------+--------+
 | 1010   | CF       | PC-Relative Call If False            | B      |
 +--------+----------+--------------------------------------+--------+
+
+Instruction Set
+---------------
+
+ADD (Add Register): Arithmetic Instruction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. figure:: images/add.png
+   :width:    722px
+   :align:    center
+   :alt:      alternate text
+
+   Figure 7: ADD
+
+**Assembler syntax:** ``add dest, src1, src2``
+
+**Description:** Adds register ``src1`` to register ``src2`` and stores the result in register ``dest``.
+
+**Operation:**
+
+.. code-block:: c
+
+   ADD(src1, src2, dest) {
+       r[dest] = r[src1] + r[src2];
+   }
