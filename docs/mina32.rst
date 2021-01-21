@@ -372,6 +372,33 @@ ADD (Add Register): Arithmetic Instruction
 
 .. code-block:: c
 
-   ADD(src1, src2, dest) {
+   ADD(src1, src2, dest)
+   {
        r[dest] = r[src1] + r[src2];
    }
+
+ADDI (Add Immediate): Arithmetic Instruction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. figure:: images/addi.png
+   :width:    722px
+   :align:    center
+   :alt:      alternate text
+
+   Figure 8: ADDI
+
+**Assembler syntax:** ``addi dest, src1, imm``
+
+**Description:** Adds shifted sign-extended 12-bit immediate ``imm`` to register ``src1`` and stores the result in register ``dest``.
+
+**Operation:**
+
+.. code-block:: c
+
+   ADDI(src1, imm, shift, dest)
+   {
+       imm = exts12(imm) LSL shift;
+       r[dest] = r[src1] + imm;
+   }
+
+.. note:: Since the 12-bit immediate is sign-extended, this instruction can add and subtract immediate data.
