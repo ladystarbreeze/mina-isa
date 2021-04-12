@@ -263,9 +263,7 @@ Move Group (``0101``)
 +--------+----------+--------------------------------------+--------+
 | 1000   | MOV      | Move Register                        | S      |
 +--------+----------+--------------------------------------+--------+
-| 1001   | MT       | Move If True Register                | S      |
-+--------+----------+--------------------------------------+--------+
-| 1010   | MF       | Move If False Register               | S      |
+| 1001   | SEL      | Select Register                      | S      |
 +--------+----------+--------------------------------------+--------+
 | 1011   | MTOC     | Move To Machine Control Register     | S      |
 +--------+----------+--------------------------------------+--------+
@@ -389,7 +387,7 @@ ADDI (Add Immediate): Arithmetic Instruction
 
 **Assembler syntax:** ``addi dest, src1, imm``
 
-**Description:** Adds shifted sign-extended 12-bit immediate ``imm`` to register ``src1`` and stores the result in register ``dest``.
+**Description:** Adds shifted sign-extended 12-bit immediate ``imm[11:0]`` to register ``src1`` and stores the result in register ``dest``.
 
 **Operation:**
 
