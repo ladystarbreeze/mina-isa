@@ -400,3 +400,50 @@ ADDI (Add Immediate): Arithmetic Instruction
    }
 
 .. note:: Since the 12-bit immediate is sign-extended, this instruction can add and subtract immediate data.
+
+AND (Logical AND Register): Logic Instruction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. figure:: images/and.png
+   :width:    722px
+   :align:    center
+   :alt:      alternate text
+
+   Figure 9: AND
+
+**Assembler syntax:** ``and dest, src1, src2``
+
+**Description:** Logically ANDs register ``src1`` with register ``src2`` and stores the result in register ``dest``.
+
+**Operation:**
+
+.. code-block:: c
+
+   AND(src1, src2, dest)
+   {
+       r[dest] = r[src1] AND r[src2];
+   }
+
+ANDI (Logical AND Immediate): Logic Instruction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   
+.. figure:: images/andi.png
+   :width:    722px
+   :align:    center
+   :alt:      alternate text
+   
+   Figure 10: ANDI
+
+**Assembler syntax:** ``andi dest, src1, imm``
+
+**Description:** Logically ANDs register ``src1`` with shifted sign-extended 12-bit immediate ``imm[11:0]`` and stores the result in register ``dest``.
+
+**Operation:**
+
+.. code-block:: c
+
+   ANDI(src1, imm, shift, dest)
+   {
+       imm = exts12(imm) LSL shift;
+       r[dest] = r[src1] AND imm;
+   }
