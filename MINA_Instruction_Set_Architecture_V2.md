@@ -9,12 +9,15 @@
     4. *System Registers*
     5. *Exception Handling*
 2. **MINA Base Integer Instruction Set, Version 2**
+    1. *Overview*
+    2. *Base Instruction Formats*
+    3. *Instruction Set Summary*
 
 ***
 
 ## **Introduction**
 
-MINA is an *open* instruction set architecture (ISA) designed to be flexible and extendable.
+MINA is an open instruction set architecture (ISA) designed to be flexible and extendable.
 
 Current and future goals include:
 * an ISA suitable for hardware implementation
@@ -60,11 +63,39 @@ The MINA ISA defines a word addressable 12-bit address space for special purpose
 
 The following addresses are currently defined:
 ```
-000h | CPUID_L (CPU IDentification Lo)
-001h | CPUID_H (CPU IDentification Hi)
-010h | EBA     (Exception Base Address)
-012h | EPC     (Exception Program Counter)
-014h | EMA     (Exception Memory Address)
+|--------------------------------------------------------------------------|
+| Addr | Name       | Description                   | Access | Priv Level  |
+|--------------------------------------------------------------------------|
+|------- CPU Identification -----------------------------------------------|
+| 000h | CPUID_L    | CPU IDentification Lo         | R      | USR/SYS/HVC |
+| 001h | CPUID_H    | CPU IDentification Hi         | R      | USR/SYS/HVC |
+|------- Exception --------------------------------------------------------|
+| 024h | ESC_SYS    | SYS Exception System Control  | R/W    |     SYS/HVC |
+| 025h | ECO_SYS    | SYS Exception COde            | R      |     SYS/HVC |
+| 026h | EPC_SYS    | SYS Exception Program Counter | R/W    |     SYS/HVC |
+| 027h | EMA_SYS    | SYS Exception Memory Address  | R      |     SYS/HVC |
+| 02Ch | ESC_HVC    | HVC Exception System Control  | R/W    |         HVC |
+| 02Dh | ECO_HVC    | HVC Exception COde            | R      |         HVC |
+| 02Eh | EPC_HVC    | HVC Exception Program Counter | R/W    |         HVC |
+| 02Fh | EMA_HVC    | HVC Exception Memory Address  | R      |         HVC |
+| 034h | EVA_SYS    | SYS Exception Vector Address  | R/W    |     SYS/HVC |
+| 03Ch | EVA_HVC    | HVC Exception Vector Address  | R/W    |         HVC |
+|------- System Control ---------------------------------------------------|
+| 040h | PSTATE     | Processor STATE               | R      | USR/SYS/HVC |
+| 042h | CTRL_USR   | USR ConTRoL                   | R/W    | USR/SYS/HVC |
+| 046h | CTRL_SYS   | SYS ConTRoL                   | R/W    |     SYS/HVC |
+| 04Eh | CTRL_HVC   | HVC Control                   | R/W    |         HVC |
+|------- Program ----------------------------------------------------------|
+| 060h | LA_USR     | USR Link Address              | R/W    | USR/SYS/HVC |
+| 061h | SP_USR     | USR Stack Pointer             | R/W    | USR/SYS/HVC |
+| 062h | LPA_USR    | USR Literal Pool Address      | R/W    | USR/SYS/HVC |
+| 064h | LA_SYS     | SYS Link Address              | R/W    |     SYS/HVC |
+| 065h | SP_SYS     | SYS Stack Pointer             | R/W    |     SYS/HVC |
+| 066h | LPA_SYS    | SYS Literal Pool Address      | R/W    |     SYS/HVC |
+| 06Ch | LA_HVC     | HVC Link Address              | R/W    |         HVC |
+| 06Dh | SP_HVC     | HVC Stack Pointer             | R/W    |         HVC |
+| 06Eh | LPA_HVC    | HVC Literal Pool Address      | R/W    |         HVC |
+|--------------------------------------------------------------------------|
 ```
 
 Addresses <= 7FFh are reserved, addresses >= 800h are implementation defined.
@@ -73,4 +104,138 @@ Addresses <= 7FFh are reserved, addresses >= 800h are implementation defined.
 
 ### **1.5 Exception Handling**
 
+TODO...
 
+***
+
+## **MINA32 Base Integer Instruction Set, Version 2**
+
+The following section describes version 2 of the MINA32 base integer ISA.
+
+***
+
+### **2.1. Overview**
+
+MINA32 has 32 32-bit general-purpose registers (*r0-r31*).
+
+***
+
+### **2.2. Base Instruction Formats**
+
+MINA32 has four core instruction formats (R/S/LB/LL). Instructions must be aligned on a 4-byte boundary.
+
+```
+Instruction Formats:
+
+|-----------------------------------------------------------------|
+| 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1                     |
+| 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 |
+|-----------------------------------------------------------------|
+| o o o o o o o o o o i i i i i i i i i i i i i i i i i i i i i i | (LB) Long immediate - Branch
+|-----------------------------------------------------------------|
+| o o o o o o o o o o D D D D D i i i i i i i i i i i i i i i i i | (LL) Long immediate - Load
+|-----------------------------------------------------------------|
+| o o o o o o o o o o D D D D D A A A A A i i i i i i i i i i i i | (S) Short immediate
+|-----------------------------------------------------------------|
+| o o o o o o o o o o D D D D D A A A A A B B B B B o o o o o o o | (R) Register
+|-----------------------------------------------------------------|
+```
+
+**LB**: LB (Long immediate - Branch) is an immediate type format. It supplies a small set of branch instructions (`BL`/`BLT`/`BRA`/`BT`) with a signed 22-bit immediate, left-shifted by 2.
+
+**LL**: LL (Long immediate - Load) is an immediate type format. It supplies special load-store instructions (`LPS`/`LPP`/`LWS`/`LWP`/`SPS`/`SWS`) with a signed 17-bit immediate, left-shifted by 2.
+
+**S**: S (Short immediate) is the standard immediate type format. It supplies all ALU instructions with a 12-bit immediate and a register operand.
+
+**R**: R (Register) is the register type format. It supplies all ALU instructions with two register operands.
+
+***
+
+### **2.3. Instruction Set Summary**
+
+```
+|----------------------------------------------------------------------------------------------------------------|
+| Group   | Format                 | Name             | Abstract                              | Code             |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LB     RD, (RA, #imm)  | Load Byte        | r8(RA + exts(#imm)) -> RD             | 0000000110DDDDDA |
+| (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LB     RD, (RA, RB)    | Load Byte        | r8(RA + RB) -> RD                     | 0000000111DDDDDA |
+| (R)     |                        |                  |                                       | AAAABBBBB0000000 |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LBS    RD, (RA, #imm)  | Load Byte Signed | r8(RA + exts(#imm)) -> tmp            | 0000100110DDDDDA |
+| (S)     |                        |                  | exts(tmp) -> RD                       | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LBS    RD, (RA, RB)    | Load Byte Signed | r8(RA + RB) -> tmp                    | 0000100111DDDDDA |
+| (R)     |                        |                  | exts(tmp) -> RD                       | AAAABBBBBiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LH     RD, (RA, #imm)  | Load Halfword    | r16(RA + 2 * exts(#imm)) -> RD        | 0000001110DDDDDA |
+| (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LH     RD, (RA, RB)    | Load Halfword    | r16(RA + RB) -> RD                    | 0000001111DDDDDA |
+| (R)     |                        |                  |                                       | AAAABBBBB0000000 |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LHS    RD, (RA, #imm)  | Load Halfword    | r16(RA + 2 * exts(#imm)) -> tmp       | 0000101110DDDDDA |
+| (S)     |                        | Signed           | exts(tmp) -> RD                       | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LHS    RD, (RA, RB)    | Load Halfword    | r16(RA + RB) -> tmp                   | 0000101111DDDDDA |
+| (R)     |                        | Signed           | exts(tmp) -> RD                       | AAAABBBBBiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LW     RD, (RA, #imm)  | Load Word        | r32(RA + 4 * exts(#imm)) -> RD        | 0000010110DDDDDA |
+| (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LW     RD, (RA, RB)    | Load Word        | r32(RA + RB) -> RD                    | 0000010111DDDDDA |
+| (R)     |                        |                  |                                       | AAAABBBBB0000000 |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LP     PD, (RA, #imm)  | Load Pair        | r32(RA + 4 * exts(#imm) + 0) -> PD+0  | 0001010110PPPP0A |
+| (S)     |                        |                  | r32(RA + 4 * exts(#imm) + 4) -> PD+1  | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| LOAD    | LP     PD, (RA, RB)    | Load Pair        | r32(RA + RB + 0) -> PD+0              | 0001010111PPPP0A |
+| (R)     |                        |                  | r32(RA + RB + 4) -> PD+1              | AAAABBBBB0000000 |
+|----------------------------------------------------------------------------------------------------------------|
+|----------------------------------------------------------------------------------------------------------------|
+| STORE   | SB     RD, (RA, #imm)  | Store Byte       | RD -> w8(RA + exts(#imm))             | 0010000110DDDDDA |
+| (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| STORE   | SB     RD, (RA, RB)    | Store Byte       | RD -> w8(RA + RB)                     | 0010000111DDDDDA |
+| (R)     |                        |                  |                                       | AAAABBBBB0000000 |
+|----------------------------------------------------------------------------------------------------------------|
+| STORE   | SH     RD, (RA, #imm)  | Store Halfword   | RD -> w16(RA + 2 * exts(#imm))        | 0010001110DDDDDA |
+| (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| STORE   | SH     RD, (RA, RB)    | Store Halfword   | RD -> w16(RA + RB)                    | 0010001111DDDDDA |
+| (R)     |                        |                  |                                       | AAAABBBBB0000000 |
+|----------------------------------------------------------------------------------------------------------------|
+| STORE   | SW     RD, (RA, #imm)  | Store Word       | RD -> w32(RA + 4 * exts(#imm))        | 0010010110DDDDDA |
+| (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| STORE   | SW     RD, (RA, RB)    | Store Word       | RD -> w32(RA + RB)                    | 0010010111DDDDDA |
+| (R)     |                        |                  |                                       | AAAABBBBB0000000 |
+|----------------------------------------------------------------------------------------------------------------|
+| STORE   | SP     PD, (RA, #imm)  | Store Pair       | PD+0 -> w32(RA + 4 * exts(#imm) + 0)  | 0011010110PPPP0A |
+| (S)     |                        |                  | PD+1 -> w32(RA + 4 * exts(#imm) + 4)  | AAAAiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| STORE   | SP     PD, (RA, RB)    | Store Pair       | PD+0 -> w32(RA + RB + 0)              | 0011010111PPPP0A |
+| (R)     |                        |                  | PD+1 -> w32(RA + RB + 4)              | AAAABBBBB0000000 |
+|----------------------------------------------------------------------------------------------------------------|
+|----------------------------------------------------------------------------------------------------------------|
+| SLOAD   | LWS    RD, (SP, #imm)  | Load Word Stack  | r32(SP + 4 * exts(#imm)) -> RD        | 0100010100DDDDDi |
+| (LL)    |                        |                  |                                       | iiiiiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| SLOAD   | LWP    RD, (LPA, #imm) | Load Word Pool   | r32(LPA + 4 * exts(#imm)) -> RD       | 0101010100DDDDDi |
+| (LL)    |                        |                  |                                       | iiiiiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| SLOAD   | LPS    PD, (SP, #imm)  | Load Pair Stack  | r32(SP + 4 * exts(#imm) + 0) -> PD+0  | 0100010100PPPP0i |
+| (LL)    |                        |                  | r32(SP + 4 * exts(#imm) + 4) -> PD+1  | iiiiiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| SLOAD   | LPP    PD, (LPA, #imm) | Load Pair Pool   | r32(LPA + 4 * exts(#imm) + 0) -> PD+0 | 0101010100PPPP0i |
+| (LL)    |                        |                  | r32(LPA + 4 * exts(#imm) + 4) -> PD+1 | iiiiiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+|----------------------------------------------------------------------------------------------------------------|
+| SSTORE  | SWS    RD, (SP, #imm)  | Store Word Stack | RD -> w32(SP + 4 * exts(#imm))        | 0110010100DDDDDi |
+| (LL)    |                        |                  |                                       | iiiiiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+| SSTORE  | SPS    PD, (SP, #imm)  | Store Pair Stack | PD+0 -> w32(SP + 4 * exts(#imm) + 0)  | 0111010100PPPP0i |
+| (LL)    |                        |                  | PD+1 -> w32(SP + 4 * exts(#imm) + 4)  | iiiiiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+```
