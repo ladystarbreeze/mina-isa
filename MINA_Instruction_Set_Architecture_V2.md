@@ -131,13 +131,13 @@ Instruction Formats:
 | 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1                     |
 | 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 |
 |-----------------------------------------------------------------|
-| o o o o o o o o o o i i i i i i i i i i i i i i i i i i i i i i | (LB) Long immediate - Branch
+| o o o o o o o o 0 0 i i i i i i i i i i i i i i i i i i i i i i | (LB) Long immediate - Branch
 |-----------------------------------------------------------------|
-| o o o o o o o o o o D D D D D i i i i i i i i i i i i i i i i i | (LL) Long immediate - Load
+| o o o o o o o o 0 1 D D D D D i i i i i i i i i i i i i i i i i | (LL) Long immediate - Load
 |-----------------------------------------------------------------|
-| o o o o o o o o o o D D D D D A A A A A i i i i i i i i i i i i | (S) Short immediate
+| o o o o o o o o 1 0 D D D D D A A A A A i i i i i i i i i i i i | (S) Short immediate
 |-----------------------------------------------------------------|
-| o o o o o o o o o o D D D D D A A A A A B B B B B o o o o o o o | (R) Register
+| o o o o o o o o 1 1 D D D D D A A A A A B B B B B o o o o o o o | (R) Register
 |-----------------------------------------------------------------|
 ```
 
@@ -157,85 +157,92 @@ Instruction Formats:
 |----------------------------------------------------------------------------------------------------------------|
 | Group   | Format                 | Name             | Abstract                              | Code             |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LB     RD, (RA, #imm)  | Load Byte        | r8(RA + exts(#imm)) -> RD             | 0000000110DDDDDA |
+| LOAD    | LB     RD, (RA, #imm)  | Load Byte        | r8(RA + exts(#imm)) -> RD             | 0000000010DDDDDA |
 | (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LB     RD, (RA, RB)    | Load Byte        | r8(RA + RB) -> RD                     | 0000000111DDDDDA |
+| LOAD    | LB     RD, (RA, RB)    | Load Byte        | r8(RA + RB) -> RD                     | 0000000011DDDDDA |
 | (R)     |                        |                  |                                       | AAAABBBBB0000000 |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LBS    RD, (RA, #imm)  | Load Byte Signed | r8(RA + exts(#imm)) -> tmp            | 0000100110DDDDDA |
+| LOAD    | LBS    RD, (RA, #imm)  | Load Byte Signed | r8(RA + exts(#imm)) -> tmp            | 0000010010DDDDDA |
 | (S)     |                        |                  | exts(tmp) -> RD                       | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LBS    RD, (RA, RB)    | Load Byte Signed | r8(RA + RB) -> tmp                    | 0000100111DDDDDA |
+| LOAD    | LBS    RD, (RA, RB)    | Load Byte Signed | r8(RA + RB) -> tmp                    | 0000010111DDDDDA |
 | (R)     |                        |                  | exts(tmp) -> RD                       | AAAABBBBBiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LH     RD, (RA, #imm)  | Load Halfword    | r16(RA + 2 * exts(#imm)) -> RD        | 0000001110DDDDDA |
+| LOAD    | LH     RD, (RA, #imm)  | Load Halfword    | r16(RA + 2 * exts(#imm)) -> RD        | 0000000110DDDDDA |
 | (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LH     RD, (RA, RB)    | Load Halfword    | r16(RA + RB) -> RD                    | 0000001111DDDDDA |
+| LOAD    | LH     RD, (RA, RB)    | Load Halfword    | r16(RA + RB) -> RD                    | 0000000111DDDDDA |
 | (R)     |                        |                  |                                       | AAAABBBBB0000000 |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LHS    RD, (RA, #imm)  | Load Halfword    | r16(RA + 2 * exts(#imm)) -> tmp       | 0000101110DDDDDA |
+| LOAD    | LHS    RD, (RA, #imm)  | Load Halfword    | r16(RA + 2 * exts(#imm)) -> tmp       | 0000010110DDDDDA |
 | (S)     |                        | Signed           | exts(tmp) -> RD                       | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LHS    RD, (RA, RB)    | Load Halfword    | r16(RA + RB) -> tmp                   | 0000101111DDDDDA |
+| LOAD    | LHS    RD, (RA, RB)    | Load Halfword    | r16(RA + RB) -> tmp                   | 0000010111DDDDDA |
 | (R)     |                        | Signed           | exts(tmp) -> RD                       | AAAABBBBBiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LW     RD, (RA, #imm)  | Load Word        | r32(RA + 4 * exts(#imm)) -> RD        | 0000010110DDDDDA |
+| LOAD    | LW     RD, (RA, #imm)  | Load Word        | r32(RA + 4 * exts(#imm)) -> RD        | 0000001010DDDDDA |
 | (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LW     RD, (RA, RB)    | Load Word        | r32(RA + RB) -> RD                    | 0000010111DDDDDA |
+| LOAD    | LW     RD, (RA, RB)    | Load Word        | r32(RA + RB) -> RD                    | 0000001011DDDDDA |
 | (R)     |                        |                  |                                       | AAAABBBBB0000000 |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LP     PD, (RA, #imm)  | Load Pair        | r32(RA + 4 * exts(#imm) + 0) -> PD+0  | 0001010110PPPP0A |
+| LOAD    | LP     PD, (RA, #imm)  | Load Pair        | r32(RA + 4 * exts(#imm) + 0) -> PD+0  | 0000101010PPPP0A |
 | (S)     |                        |                  | r32(RA + 4 * exts(#imm) + 4) -> PD+1  | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| LOAD    | LP     PD, (RA, RB)    | Load Pair        | r32(RA + RB + 0) -> PD+0              | 0001010111PPPP0A |
+| LOAD    | LP     PD, (RA, RB)    | Load Pair        | r32(RA + RB + 0) -> PD+0              | 0000101011PPPP0A |
 | (R)     |                        |                  | r32(RA + RB + 4) -> PD+1              | AAAABBBBB0000000 |
 |----------------------------------------------------------------------------------------------------------------|
 |----------------------------------------------------------------------------------------------------------------|
-| STORE   | SB     RD, (RA, #imm)  | Store Byte       | RD -> w8(RA + exts(#imm))             | 0010000110DDDDDA |
+| STORE   | SB     RD, (RA, #imm)  | Store Byte       | RD -> w8(RA + exts(#imm))             | 0001000010DDDDDA |
 | (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| STORE   | SB     RD, (RA, RB)    | Store Byte       | RD -> w8(RA + RB)                     | 0010000111DDDDDA |
+| STORE   | SB     RD, (RA, RB)    | Store Byte       | RD -> w8(RA + RB)                     | 0001000011DDDDDA |
 | (R)     |                        |                  |                                       | AAAABBBBB0000000 |
 |----------------------------------------------------------------------------------------------------------------|
-| STORE   | SH     RD, (RA, #imm)  | Store Halfword   | RD -> w16(RA + 2 * exts(#imm))        | 0010001110DDDDDA |
+| STORE   | SH     RD, (RA, #imm)  | Store Halfword   | RD -> w16(RA + 2 * exts(#imm))        | 0001000110DDDDDA |
 | (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| STORE   | SH     RD, (RA, RB)    | Store Halfword   | RD -> w16(RA + RB)                    | 0010001111DDDDDA |
+| STORE   | SH     RD, (RA, RB)    | Store Halfword   | RD -> w16(RA + RB)                    | 0001000111DDDDDA |
 | (R)     |                        |                  |                                       | AAAABBBBB0000000 |
 |----------------------------------------------------------------------------------------------------------------|
-| STORE   | SW     RD, (RA, #imm)  | Store Word       | RD -> w32(RA + 4 * exts(#imm))        | 0010010110DDDDDA |
+| STORE   | SW     RD, (RA, #imm)  | Store Word       | RD -> w32(RA + 4 * exts(#imm))        | 0001001010DDDDDA |
 | (S)     |                        |                  |                                       | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| STORE   | SW     RD, (RA, RB)    | Store Word       | RD -> w32(RA + RB)                    | 0010010111DDDDDA |
+| STORE   | SW     RD, (RA, RB)    | Store Word       | RD -> w32(RA + RB)                    | 0001001011DDDDDA |
 | (R)     |                        |                  |                                       | AAAABBBBB0000000 |
 |----------------------------------------------------------------------------------------------------------------|
-| STORE   | SP     PD, (RA, #imm)  | Store Pair       | PD+0 -> w32(RA + 4 * exts(#imm) + 0)  | 0011010110PPPP0A |
+| STORE   | SP     PD, (RA, #imm)  | Store Pair       | PD+0 -> w32(RA + 4 * exts(#imm) + 0)  | 0001101011PPPP0A |
 | (S)     |                        |                  | PD+1 -> w32(RA + 4 * exts(#imm) + 4)  | AAAAiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| STORE   | SP     PD, (RA, RB)    | Store Pair       | PD+0 -> w32(RA + RB + 0)              | 0011010111PPPP0A |
+| STORE   | SP     PD, (RA, RB)    | Store Pair       | PD+0 -> w32(RA + RB + 0)              | 0001101011PPPP0A |
 | (R)     |                        |                  | PD+1 -> w32(RA + RB + 4)              | AAAABBBBB0000000 |
 |----------------------------------------------------------------------------------------------------------------|
 |----------------------------------------------------------------------------------------------------------------|
-| SLOAD   | LWS    RD, (SP, #imm)  | Load Word Stack  | r32(SP + 4 * exts(#imm)) -> RD        | 0100010100DDDDDi |
+| SLOAD   | LWS    RD, (SP, #imm)  | Load Word Stack  | r32(SP + 4 * exts(#imm)) -> RD        | 0010001001DDDDDi |
 | (LL)    |                        |                  |                                       | iiiiiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| SLOAD   | LWP    RD, (LPA, #imm) | Load Word Pool   | r32(LPA + 4 * exts(#imm)) -> RD       | 0101010100DDDDDi |
+| SLOAD   | LWP    RD, (LPA, #imm) | Load Word Pool   | r32(LPA + 4 * exts(#imm)) -> RD       | 0010011001DDDDDi |
 | (LL)    |                        |                  |                                       | iiiiiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| SLOAD   | LPS    PD, (SP, #imm)  | Load Pair Stack  | r32(SP + 4 * exts(#imm) + 0) -> PD+0  | 0100010100PPPP0i |
+| SLOAD   | LPS    PD, (SP, #imm)  | Load Pair Stack  | r32(SP + 4 * exts(#imm) + 0) -> PD+0  | 0010101001PPPP0i |
 | (LL)    |                        |                  | r32(SP + 4 * exts(#imm) + 4) -> PD+1  | iiiiiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| SLOAD   | LPP    PD, (LPA, #imm) | Load Pair Pool   | r32(LPA + 4 * exts(#imm) + 0) -> PD+0 | 0101010100PPPP0i |
+| SLOAD   | LPP    PD, (LPA, #imm) | Load Pair Pool   | r32(LPA + 4 * exts(#imm) + 0) -> PD+0 | 0010111001PPPP0i |
 | (LL)    |                        |                  | r32(LPA + 4 * exts(#imm) + 4) -> PD+1 | iiiiiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
 |----------------------------------------------------------------------------------------------------------------|
-| SSTORE  | SWS    RD, (SP, #imm)  | Store Word Stack | RD -> w32(SP + 4 * exts(#imm))        | 0110010100DDDDDi |
+| SSTORE  | SWS    RD, (SP, #imm)  | Store Word Stack | RD -> w32(SP + 4 * exts(#imm))        | 0011001001DDDDDi |
 | (LL)    |                        |                  |                                       | iiiiiiiiiiiiiiii |
 |----------------------------------------------------------------------------------------------------------------|
-| SSTORE  | SPS    PD, (SP, #imm)  | Store Pair Stack | PD+0 -> w32(SP + 4 * exts(#imm) + 0)  | 0111010100PPPP0i |
+| SSTORE  | SPS    PD, (SP, #imm)  | Store Pair Stack | PD+0 -> w32(SP + 4 * exts(#imm) + 0)  | 0011101001PPPP0i |
 | (LL)    |                        |                  | PD+1 -> w32(SP + 4 * exts(#imm) + 4)  | iiiiiiiiiiiiiiii |
+|----------------------------------------------------------------------------------------------------------------|
+|----------------------------------------------------------------------------------------------------------------|
+| CONTROL | CLRT                   | CLeaR T          | 0 -> PSTATE.T                         | 1000000000000000 |
+| (LB)    |                        |                  |                                       | 0000000000000000 |
+|----------------------------------------------------------------------------------------------------------------|
+| CONTROL | SETT                   | SET T            | 1 -> PSTATE.T                         | 1000000100000000 |
+| (LB)    |                        |                  |                                       | 0000000000000000 |
 |----------------------------------------------------------------------------------------------------------------|
 ```
