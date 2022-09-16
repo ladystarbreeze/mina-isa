@@ -84,17 +84,14 @@ The following addresses are currently defined:
 | 040h | PSTATE     | Processor STATE               | R      | USR/SYS/HVC |
 | 042h | CTRL_USR   | USR ConTRoL                   | R/W    | USR/SYS/HVC |
 | 046h | CTRL_SYS   | SYS ConTRoL                   | R/W    |     SYS/HVC |
-| 04Eh | CTRL_HVC   | HVC Control                   | R/W    |         HVC |
+| 04Eh | CTRL_HVC   | HVC ConTRoL                   | R/W    |         HVC |
 |------- Program ----------------------------------------------------------|
 | 060h | LA_USR     | USR Link Address              | R/W    | USR/SYS/HVC |
-| 061h | SP_USR     | USR Stack Pointer             | R/W    | USR/SYS/HVC |
-| 062h | LPA_USR    | USR Literal Pool Address      | R/W    | USR/SYS/HVC |
+| 061h | BA_USR     | USR Base Address              | R/W    | USR/SYS/HVC |
 | 064h | LA_SYS     | SYS Link Address              | R/W    |     SYS/HVC |
-| 065h | SP_SYS     | SYS Stack Pointer             | R/W    |     SYS/HVC |
-| 066h | LPA_SYS    | SYS Literal Pool Address      | R/W    |     SYS/HVC |
+| 065h | BA_SYS     | SYS Base Address              | R/W    |     SYS/HVC |
 | 06Ch | LA_HVC     | HVC Link Address              | R/W    |         HVC |
-| 06Dh | SP_HVC     | HVC Stack Pointer             | R/W    |         HVC |
-| 06Eh | LPA_HVC    | HVC Literal Pool Address      | R/W    |         HVC |
+| 06Dh | BA_HVC     | HVC Base Address              | R/W    |         HVC |
 |--------------------------------------------------------------------------|
 ```
 
@@ -143,7 +140,7 @@ Instruction Formats:
 
 **LB**: LB (Long immediate - Branch) is an immediate type format. It supplies a small set of branch instructions (`BL`/`BLT`/`BRA`/`BT`) with a signed 22-bit immediate, left-shifted by 2.
 
-**LL**: LL (Long immediate - Load) is an immediate type format. It supplies special load-store instructions (`LPS`/`LPP`/`LWS`/`LWP`/`SPS`/`SWS`) with a signed 17-bit immediate, left-shifted by 2.
+**LL**: LL (Long immediate - Load) is an immediate type format. It supplies special load-store instructions (`LPS`/`LPP`/`LWS`/`LWP`/`SPS`/`SWS`) with an unsigned 17-bit immediate, left-shifted by 2.
 
 **S**: S (Short immediate) is the standard immediate type format. It supplies all ALU instructions with a 12-bit immediate and a register operand.
 
@@ -152,6 +149,15 @@ Instruction Formats:
 ***
 
 ### **2.3. Instruction Set Summary**
+
+```
+LOAD    - 0000 PSSz Fm
+STORE   - 0001 P-Sz Fm
+SLOAD   - 0010 PRSz Fm
+SSTORE  - 0011 P-Sz Fm
+CONTROL - 0100 Opco Fm
+
+```
 
 ```
 |--------------------------------------------------------------------------------------------------------------------------|
@@ -219,30 +225,33 @@ Instruction Formats:
 | (R)     |                        |                  | PD+1 -> w32(RA + RB + 4)                        | AAAABBBBB0000000 |
 |--------------------------------------------------------------------------------------------------------------------------|
 |--------------------------------------------------------------------------------------------------------------------------|
-| SLOAD   | LWS    RD, (SP, #imm)  | Load Word Stack  | r32(SP + 4 * exts(#imm)) -> RD                  | 0010001001DDDDDi |
+| SLOAD   | LWB    RD, (BA, #imm)  | Load Word Base   | r32(BA + 4 * #imm) -> RD                        | 0010001001DDDDDi |
 | (LL)    |                        |                  |                                                 | iiiiiiiiiiiiiiii |
 |--------------------------------------------------------------------------------------------------------------------------|
-| SLOAD   | LWP    RD, (LPA, #imm) | Load Word Pool   | r32(LPA + 4 * exts(#imm)) -> RD                 | 0010011001DDDDDi |
+| SLOAD   | LWP    RD, (PC, #imm)  | Load Word PC     | r32(PC + 4 * #imm) -> RD                        | 0010011001DDDDDi |
 | (LL)    |                        |                  |                                                 | iiiiiiiiiiiiiiii |
 |--------------------------------------------------------------------------------------------------------------------------|
-| SLOAD   | LPS    PD, (SP, #imm)  | Load Pair Stack  | r32(SP + 4 * exts(#imm) + 0) -> PD+0            | 0010101001PPPP0i |
-| (LL)    |                        |                  | r32(SP + 4 * exts(#imm) + 4) -> PD+1            | iiiiiiiiiiiiiiii |
+| SLOAD   | LPB    PD, (BA, #imm)  | Load Pair Base   | r32(BA + 4 * #imm + 0) -> PD+0                  | 0010101001PPPP0i |
+| (LL)    |                        |                  | r32(BA + 4 * #imm + 4) -> PD+1                  | iiiiiiiiiiiiiiii |
 |--------------------------------------------------------------------------------------------------------------------------|
-| SLOAD   | LPP    PD, (LPA, #imm) | Load Pair Pool   | r32(LPA + 4 * exts(#imm) + 0) -> PD+0           | 0010111001PPPP0i |
-| (LL)    |                        |                  | r32(LPA + 4 * exts(#imm) + 4) -> PD+1           | iiiiiiiiiiiiiiii |
+| SLOAD   | LPP    PD, (PC, #imm)  | Load Pair PC     | r32(PC + 4 * #imm + 0) -> PD+0                  | 0010111001PPPP0i |
+| (LL)    |                        |                  | r32(PC + 4 * #imm + 4) -> PD+1                  | iiiiiiiiiiiiiiii |
 |--------------------------------------------------------------------------------------------------------------------------|
 |--------------------------------------------------------------------------------------------------------------------------|
-| SSTORE  | SWS    RD, (SP, #imm)  | Store Word Stack | RD -> w32(SP + 4 * exts(#imm))                  | 0011001001DDDDDi |
+| SSTORE  | SWB    RD, (BA, #imm)  | Store Word Base  | RD -> w32(BA + 4 * #imm)                        | 0011001001DDDDDi |
 | (LL)    |                        |                  |                                                 | iiiiiiiiiiiiiiii |
 |--------------------------------------------------------------------------------------------------------------------------|
-| SSTORE  | SPS    PD, (SP, #imm)  | Store Pair Stack | PD+0 -> w32(SP + 4 * exts(#imm) + 0)            | 0011101001PPPP0i |
-| (LL)    |                        |                  | PD+1 -> w32(SP + 4 * exts(#imm) + 4)            | iiiiiiiiiiiiiiii |
+| SSTORE  | SPB    PD, (BA, #imm)  | Store Pair Base  | PD+0 -> w32(BA + 4 * #imm + 0)                  | 0011101001PPPP0i |
+| (LL)    |                        |                  | PD+1 -> w32(BA + 4 * #imm + 4)                  | iiiiiiiiiiiiiiii |
 |--------------------------------------------------------------------------------------------------------------------------|
 |--------------------------------------------------------------------------------------------------------------------------|
 | CONTROL | CLRT                   | CLeaR T          | 0 -> PSTATE.T                                   | 0100000000000000 |
 | (LB)    |                        |                  |                                                 | 0000000000000000 |
 |--------------------------------------------------------------------------------------------------------------------------|
 | CONTROL | SETT                   | SET T            | 1 -> PSTATE.T                                   | 0100000100000000 |
+| (LB)    |                        |                  |                                                 | 0000000000000000 |
+|--------------------------------------------------------------------------------------------------------------------------|
+| CONTROL | NOTT                   | NOT T            | ~(PSTATE.T) -> PSTATE.T                         | 0100001000000000 |
 | (LB)    |                        |                  |                                                 | 0000000000000000 |
 |--------------------------------------------------------------------------------------------------------------------------|
 |--------------------------------------------------------------------------------------------------------------------------|
@@ -308,5 +317,18 @@ Instruction Formats:
 | SALU    | CLPHS  RD, RA          | CLiP Halfword    | if RA >  7FFFh:  7FFFh -> RD, 1 -> PSTATE.T     | 1010110110DDDDDA |
 | (S)     |                        | Signed           | if RA < -8000h: -8000h -> RD, 1 -> PSTATE.T     | AAAA000000000000 |
 |         |                        |                  | else:               RA -> RD, 0 -> PSTATE.T     |                  |
+|--------------------------------------------------------------------------------------------------------------------------|
+|--------------------------------------------------------------------------------------------------------------------------|
+| BRANCH  | BRA LABEL              | BRAnch           | PC + 4 * exts(#imm) -> PC                       | 1111000000iiiiii |
+| (LB)    |                        |                  |                                                 | iiiiiiiiiiiiiiii |
+|--------------------------------------------------------------------------------------------------------------------------|
+| BRANCH  | BRA RD                 | BRAnch           | PC + RD -> PC                                   | 1111000001DDDDD0 |
+| (LL)    |                        |                  |                                                 | 0000000000000000 |
+|--------------------------------------------------------------------------------------------------------------------------|
+| BRANCH  | CALL LABEL             | CALL             | PC + 4 -> LA                                    | 1111000100iiiiii |
+| (LB)    |                        |                  | PC + 4 * exts(#imm) -> PC                       | iiiiiiiiiiiiiiii |
+|--------------------------------------------------------------------------------------------------------------------------|
+| BRANCH  | CALL RD                | CALL             | PC + 4 -> LA                                    | 1111000101DDDDD0 |
+| (LL)    |                        |                  | PC + RD -> PC                                   | 0000000000000000 |
 |--------------------------------------------------------------------------------------------------------------------------|
 ```
