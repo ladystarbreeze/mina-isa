@@ -62,7 +62,7 @@ The MINA ISA currently defines the following data types:
 The MINA ISA defines a word addressable 12-bit address space for special purpose registers called *system registers* (SR). Programmers can access SRs with the `MTS` (Move To System) and `MFS` (Move From System) instructions.
 
 The following addresses are currently defined:
-```
+
 |--------------------------------------------------------------------------|
 | Addr | Name       | Description                   | Access | Priv Level  |
 |--------------------------------------------------------------------------|
@@ -93,7 +93,6 @@ The following addresses are currently defined:
 | 06Ch | LA_HVC     | HVC Link Address              | R/W    |         HVC |
 | 06Dh | BA_HVC     | HVC Base Address              | R/W    |         HVC |
 |--------------------------------------------------------------------------|
-```
 
 Addresses <= 7FFh are reserved, addresses >= 800h are implementation defined.
 
@@ -151,14 +150,14 @@ Instruction Formats:
 ### **2.3. Instruction Set Summary**
 
 ```
-LOAD     - 0000 PSSz Fm |   P = Pair   | S = Sign-extend |    Sz = Size    | Fm = Format
-STORE    - 0001 P-Sz Fm |   P = Pair   |                 |    Sz = Size    | Fm = Format
-SLOAD    - 0010 PRSz Fm |   P = Pair   | R = PC-relative |    Sz = Size    | Fm = Format
-SSTORE   - 0011 P-Sz Fm |   P = Pair   |                 |    Sz = Size    | Fm = Format
-CONTROL  - 0100 Opco Fm |              |  Opco = Opcode  |                 | Fm = Format
-SALU     - 1010 CSSz Fm |   C = Clip   | S = Sign-extend |    Sz = Size    | Fm = Format
-BRANCH   - 1110 R-CL Fm | R = Relative | C = Conditional |    L  = Link    | Fm = Format
-EXTENDED - 1111 xxxx Fm |              |                 |                 | Fm = Format
+LOAD    - 0000 PSSz Fm |   P = Pair   | S = Sign-extend |    Sz = Size    | Fm = Format
+STORE   - 0001 P-Sz Fm |   P = Pair   |                 |    Sz = Size    | Fm = Format
+SLOAD   - 0010 PRSz Fm |   P = Pair   | R = PC-relative |    Sz = Size    | Fm = Format
+SSTORE  - 0011 P-Sz Fm |   P = Pair   |                 |    Sz = Size    | Fm = Format
+CONTROL - 0100 Opco Fm |              |  Opco = Opcode  |                 | Fm = Format
+SALU    - 1010 CSSz Fm |   C = Clip   | S = Sign-extend |    Sz = Size    | Fm = Format
+BRANCH  - 1110 R-CL Fm | R = Relative | C = Conditional |    L  = Link    | Fm = Format
+EXTEND  - 1111 xxxx Fm |              |                 |                 | Fm = Format
 ```
 
 ```
